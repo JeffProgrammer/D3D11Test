@@ -35,6 +35,7 @@
 
 #include <stdlib.h>
 #include <SDL.h>
+#include <SDL_syswm.h>
 
 // Windows specific header + D3D11 SDK header
 #include <Windows.h>
@@ -45,6 +46,8 @@
 #undef main
 #endif // main
 
+HWND getWindowHandle(SDL_Window *window);
+
 int main(int argc, const char **argv) {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
@@ -53,6 +56,14 @@ int main(int argc, const char **argv) {
 	if (window == nullptr) {
 		SDL_Quit();
 		return 1;
+	}
+
+	// get window handle from the window
+	HWND windowHandle = getWindowHandle(window);
+	if (windowHandle == nullptr) {
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return 2;
 	}
 
 	SDL_Event event;
@@ -73,4 +84,13 @@ int main(int argc, const char **argv) {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
+}
+
+HWND getWindowHandle(SDL_Window *window) {
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	if (!SDL_GetWindowWMInfo(window, &info))
+		return nullptr;
+
+	return info.info.win.window;
 }
