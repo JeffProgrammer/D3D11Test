@@ -41,6 +41,9 @@
 #include <Windows.h>
 #include <d3d11.h>
 
+// link with D3D11.lib
+#pragma comment(lib, "D3D11.lib")
+
 // SDL2 hack.
 #ifdef main
 #undef main
