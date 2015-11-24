@@ -49,7 +49,11 @@
 #undef main
 #endif // main
 
+// used to signify that the variable is being outputted
+#define OUT 
+
 HWND getWindowHandle(SDL_Window *window);
+bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *device, OUT IDXGISwapChain *swapChain, OUT ID3D11DeviceContext *context);
 
 int main(int argc, const char **argv) {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
@@ -68,6 +72,17 @@ int main(int argc, const char **argv) {
 		SDL_Quit();
 		return 2;
 	}
+
+	ID3D11Device *device = nullptr;
+	IDXGISwapChain *swapChain = nullptr;
+	ID3D11DeviceContext *context = nullptr;
+	bool r = createD3D11DeviceAndSwapChain(windowHandle, device, swapChain, context);
+	if (r == false) {
+		SDL_DestroyWindow(window);
+		SDL_Quit();
+		return 3;
+	}
+
 
 	SDL_Event event;
 	bool running = true;
@@ -96,4 +111,44 @@ HWND getWindowHandle(SDL_Window *window) {
 		return nullptr;
 
 	return info.info.win.window;
+}
+
+bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *device, OUT IDXGISwapChain *swapChain, OUT ID3D11DeviceContext *context) {
+	// create swap chain description
+	DXGI_SWAP_CHAIN_DESC swapDesc;
+	ZeroMemory(&swapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+	swapDesc.BufferCount = 1; // how many back buffers
+	swapDesc.BufferDesc.Width = 1336; // window width
+	swapDesc.BufferDesc.Height = 768; // window height
+	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // standard backbuffer format
+	swapDesc.BufferDesc.RefreshRate.Numerator = 60; // vsync
+	swapDesc.BufferDesc.RefreshRate.Denominator = 1; // vsync
+	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT; // yes we are rendering to a window
+	swapDesc.OutputWindow = window; // the window we are outputting to
+	swapDesc.SampleDesc.Count = 1;
+	swapDesc.SampleDesc.Quality = 0; // Antialiasing
+	swapDesc.Windowed = true; // we are not in fullscreen
+
+	// request feature level 11_0
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+	UINT featureLevelCount = 1;
+	D3D_FEATURE_LEVEL featureLevelSupported;
+
+	HRESULT r = D3D11CreateDeviceAndSwapChain(
+		NULL,								// adapter
+		D3D_DRIVER_TYPE_HARDWARE,	// device type
+		NULL,								// do we want software emulation for features not supported?
+		0,									// device flags
+		&featureLevel,					// feature level(s) requested
+		featureLevelCount,			// amount of feature level(s) requested
+		D3D11_SDK_VERSION,			// version of the DX11 SDK
+		&swapDesc,						// swap chain description
+		&swapChain,						// OUT the swap chain pointer
+		&device,							// OUT the d3d11 device
+		&featureLevelSupported,		// OUT the d3d11 feature level that is supported on this computer.
+		&context							// OUT the d3d11 context
+	);
+	if (r == S_OK)
+		return true;
+	return false;
 }
