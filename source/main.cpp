@@ -44,6 +44,13 @@
 int main(int argc, const char **argv) {
 	SDL_Init(SDL_INIT_VIDEO);
 
+	// create window
+	SDL_Window *window = SDL_CreateWindow("D3D11 Test Application", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1366, 768, SDL_WINDOW_SHOWN);
+	if (window == nullptr) {
+		SDL_Quit();
+		return 1;
+	}
+
 	SDL_Event event;
 	bool running = true;
 	while (running) {
