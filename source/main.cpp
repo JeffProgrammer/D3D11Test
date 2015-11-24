@@ -28,18 +28,22 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-----------------------------------------------------------------------------
 
+// Require MSVC compiler for this application
+#ifndef _MSC_VER
+#error "You must use MSVC to compile this application."
+#endif // _MSC_VER
+
 #include <stdlib.h>
 #include <SDL.h>
+
+// Windows specific header + D3D11 SDK header
+#include <Windows.h>
+#include <d3d11.h>
 
 // SDL2 hack.
 #ifdef main
 #undef main
 #endif // main
-
-// Require MSVC compiler for this application
-#ifndef _MSC_VER
-#error "You must use MSVC to compile this application."
-#endif // _MSC_VER
 
 int main(int argc, const char **argv) {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -65,6 +69,8 @@ int main(int argc, const char **argv) {
 		}
 	}
 
+	// cleanup
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
 }
