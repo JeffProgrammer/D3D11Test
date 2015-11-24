@@ -83,6 +83,35 @@ int main(int argc, const char **argv) {
 		return 3;
 	}
 
+	// render target view
+	ID3D11RenderTargetView *rtv = nullptr;
+	{
+		ID3D11Texture2D *backBuffer = nullptr;
+		if (swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer) != S_OK) {
+			SDL_DestroyWindow(window);
+			SDL_Quit();
+			return 4;
+		}
+		HRESULT check = device->CreateRenderTargetView(backBuffer, NULL, &rtv);
+		// release back buffer texture as it already has been set.
+		backBuffer->Release();
+		if (check != S_OK) {
+			SDL_DestroyWindow(window);
+			SDL_Quit();
+			return 5;
+		}
+		context->OMSetRenderTargets(1, &rtv, NULL);
+	}
+
+	// set viewport
+	D3D11_VIEWPORT vp;
+	vp.Width = (FLOAT)1366;
+	vp.Height = (FLOAT)768;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	context->RSSetViewports(1, &vp);
 
 	SDL_Event event;
 	bool running = true;
