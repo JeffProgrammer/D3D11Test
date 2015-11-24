@@ -53,7 +53,8 @@
 #define OUT 
 
 HWND getWindowHandle(SDL_Window *window);
-bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *device, OUT IDXGISwapChain *swapChain, OUT ID3D11DeviceContext *context);
+bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *&device, OUT IDXGISwapChain *&swapChain, OUT ID3D11DeviceContext *&context);
+void render(ID3D11Device *device, ID3D11DeviceContext *context);
 
 int main(int argc, const char **argv) {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
@@ -125,6 +126,15 @@ int main(int argc, const char **argv) {
 				break;
 			}
 		}
+
+		// clear color
+		static float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+		context->ClearRenderTargetView(rtv, clearColor);
+
+		render(device, context);
+
+		// swap buffer
+		swapChain->Present(0, 0);
 	}
 
 	// cleanup
@@ -142,12 +152,12 @@ HWND getWindowHandle(SDL_Window *window) {
 	return info.info.win.window;
 }
 
-bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *device, OUT IDXGISwapChain *swapChain, OUT ID3D11DeviceContext *context) {
+bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *&device, OUT IDXGISwapChain *&swapChain, OUT ID3D11DeviceContext *&context) {
 	// create swap chain description
 	DXGI_SWAP_CHAIN_DESC swapDesc;
 	ZeroMemory(&swapDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 	swapDesc.BufferCount = 1; // how many back buffers
-	swapDesc.BufferDesc.Width = 1336; // window width
+	swapDesc.BufferDesc.Width = 1366; // window width
 	swapDesc.BufferDesc.Height = 768; // window height
 	swapDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // standard backbuffer format
 	swapDesc.BufferDesc.RefreshRate.Numerator = 60; // vsync
@@ -180,4 +190,8 @@ bool createD3D11DeviceAndSwapChain(HWND window, OUT ID3D11Device *device, OUT ID
 	if (r == S_OK)
 		return true;
 	return false;
+}
+
+void render(ID3D11Device *device, ID3D11DeviceContext *context) {
+
 }
