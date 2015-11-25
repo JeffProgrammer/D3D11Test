@@ -88,7 +88,7 @@ int main(int argc, const char **argv) {
 	ID3D11RenderTargetView *rtv = nullptr;
 	{
 		ID3D11Texture2D *backBuffer = nullptr;
-		if (swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer) != S_OK) {
+		if (swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer)) != S_OK) {
 			SDL_DestroyWindow(window);
 			SDL_Quit();
 			return 4;
@@ -106,13 +106,16 @@ int main(int argc, const char **argv) {
 
 	// set viewport
 	D3D11_VIEWPORT vp;
-	vp.Width = (FLOAT)1366;
-	vp.Height = (FLOAT)768;
+	vp.Width = 1366.0f;
+	vp.Height = 768.0f;
 	vp.MinDepth = 0.0f;
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0;
 	vp.TopLeftY = 0;
 	context->RSSetViewports(1, &vp);
+
+	// clear color
+	static float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 	SDL_Event event;
 	bool running = true;
@@ -127,10 +130,10 @@ int main(int argc, const char **argv) {
 			}
 		}
 
-		// clear color
-		static float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+		// set canvas clear color
 		context->ClearRenderTargetView(rtv, clearColor);
 
+		// perform any additional render logic
 		render(device, context);
 
 		// swap buffer
