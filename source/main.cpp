@@ -115,7 +115,7 @@ int main(int argc, const char **argv) {
 	context->RSSetViewports(1, &vp);
 
 	// clear color
-	static float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
+	const float clearColor[4] = { 1.0f, 0.0f, 0.0f, 1.0f };
 
 	SDL_Event event;
 	bool running = true;
